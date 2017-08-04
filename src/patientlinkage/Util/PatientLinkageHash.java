@@ -44,8 +44,8 @@ public class PatientLinkageHash {
 	public static void main(String[] args) {
 
 		long t1 = System.currentTimeMillis();
-		String[] args0 = { "-config", "./configs/config_gen_1K.txt", "-data", "./data/Source14k_a_1K.csv" };
-		String[] args1 = { "-config", "./configs/config_eva_1K.txt", "-data", "./data/Source14k_b_1K.csv" };
+		final String[] args0 = { "-config", "./configs/config_gen_1K.txt", "-data", "./data/Source14k_a_1K.csv" };
+		final String[] args1 = { "-config", "./configs/config_eva_1K.txt", "-data", "./data/Source14k_b_1K.csv" };
 		startLinkage(args0, args1);
 		t1 = System.currentTimeMillis() - t1;
 		System.out.println("The running time is " + t1);
@@ -53,20 +53,20 @@ public class PatientLinkageHash {
 
 	public static ArrayList<byte[][]> readAndEncodeWithProps(String FileName, int[][] lens) {
 
-		ArrayList<byte[][]> retArrList = new ArrayList<>();
-		int properties_num = lens[0].length;
-		Soundex sdx = new Soundex();
-		String res = "";
+		final ArrayList<byte[][]> retArrList = new ArrayList<>();
+		final int properties_num = lens[0].length;
+		final Soundex sdx = new Soundex();
+		final String res = "";
 		try (CSVReader reader = new CSVReader(new FileReader(FileName))) {
-			MessageDigest digest = MessageDigest.getInstance("SHA-512");
+			final MessageDigest digest = MessageDigest.getInstance("SHA-512");
 			String[] strs;
 			reader.readNext();
 			while ((strs = reader.readNext()) != null) {
-				String[] coms_strs = new String[lens.length];
-				byte[][] hash_bytes = new byte[lens.length][];
+				final String[] coms_strs = new String[lens.length];
+				final byte[][] hash_bytes = new byte[lens.length][];
 				Arrays.fill(coms_strs, "");
 				for (int i = 0; i < properties_num; i++) {
-					String temp = strs[i].replace("-", "").toLowerCase();
+					final String temp = strs[i].replace("-", "").toLowerCase();
 					for (int j = 0; j < coms_strs.length; j++) {
 						if (lens[j][i] > 65536) {
 							coms_strs[j] += sdx.soundex(temp);
@@ -80,7 +80,7 @@ public class PatientLinkageHash {
 				}
 				retArrList.add(hash_bytes);
 			}
-		} catch (FileNotFoundException ex) {
+		} catch (final FileNotFoundException ex) {
 			Logger.getLogger(PatientLinkageHash.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException | NoSuchAlgorithmException ex) {
 			Logger.getLogger(PatientLinkageHash.class.getName()).log(Level.SEVERE, null, ex);
@@ -93,7 +93,7 @@ public class PatientLinkageHash {
 		String file_config = null;
 		String file_data1 = null;
 		String file_data2 = null;
-		ArrayList<int[]> prop_array = new ArrayList<>();
+		final ArrayList<int[]> prop_array = new ArrayList<>();
 		if (args.length < 1) {
 			usagemain();
 			return;
@@ -121,9 +121,9 @@ public class PatientLinkageHash {
 						break;
 					}
 				}
-			} catch (IndexOutOfBoundsException e) {
+			} catch (final IndexOutOfBoundsException e) {
 				System.out.println("please input the configure file or data file!");
-			} catch (IllegalArgumentException e) {
+			} catch (final IllegalArgumentException e) {
 				System.out.println(args[i] + " is illegal input");
 			}
 		}
@@ -150,9 +150,9 @@ public class PatientLinkageHash {
 						break;
 					}
 				}
-			} catch (IndexOutOfBoundsException e) {
+			} catch (final IndexOutOfBoundsException e) {
 				System.out.println("please input the configure file or data file!");
-			} catch (IllegalArgumentException e) {
+			} catch (final IllegalArgumentException e) {
 				System.out.println(arg1[i] + " is illegal input");
 			}
 		}
@@ -160,15 +160,15 @@ public class PatientLinkageHash {
 		try (FileReader fid_config = new FileReader(file_config); BufferedReader br_config = new BufferedReader(fid_config)) {
 			String line;
 			while ((line = br_config.readLine()) != null) {
-				String[] strs1 = line.split("\\|");
+				final String[] strs1 = line.split("\\|");
 				if (strs1.length < 1) {
 					continue;
 				}
-				String str = strs1[0].trim();
+				final String str = strs1[0].trim();
 				if (str.equals("") || !str.contains(":")) {
 					continue;
 				}
-				String[] strs2 = str.split(":");
+				final String[] strs2 = str.split(":");
 				switch (strs2[0].trim()) {
 					case "com": {
 						tmp = strs2[1].trim().split("->");
@@ -180,26 +180,26 @@ public class PatientLinkageHash {
 					}
 				}
 			}
-		} catch (FileNotFoundException ex) {
+		} catch (final FileNotFoundException ex) {
 			Logger.getLogger(PatientLinkageHash.class.getName()).log(Level.SEVERE, null, ex);
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			Logger.getLogger(PatientLinkageHash.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		int[][] array_int1 = new int[prop_array.size()][];
+		final int[][] array_int1 = new int[prop_array.size()][];
 		for (int i = 0; i < array_int1.length; i++) {
 			array_int1[i] = prop_array.get(i);
 			// System.out.println(Arrays.toString(array_int1[i]));
 		}
-		ArrayList<byte[][]> arr_list1 = readAndEncodeWithProps(file_data1, array_int1);
-		ArrayList<byte[][]> arr_list2 = readAndEncodeWithProps(file_data2, array_int1);
-		int size1 = arr_list1.size();
-		int size2 = arr_list2.size();
+		final ArrayList<byte[][]> arr_list1 = readAndEncodeWithProps(file_data1, array_int1);
+		final ArrayList<byte[][]> arr_list2 = readAndEncodeWithProps(file_data2, array_int1);
+		final int size1 = arr_list1.size();
+		final int size2 = arr_list2.size();
 		int num_of_matched = 0;
 		for (int m = 0; m < size1; m++) {
-			byte[][] byte1 = arr_list1.get(m);
+			final byte[][] byte1 = arr_list1.get(m);
 			for (int n = 0; n < size2; n++) {
 				boolean is_matched = false;
-				byte[][] byte2 = arr_list2.get(n);
+				final byte[][] byte2 = arr_list2.get(n);
 				for (int k = 0; k < byte1.length; k++) {
 					is_matched |= compBytes(byte1[k], byte2[k]);
 				}
@@ -213,7 +213,7 @@ public class PatientLinkageHash {
 
 	public static void usagemain() {
 
-		String help_str = "" + String.format("     -config     <path>      : input configure file path\n") + String.format("     -data       <path>      : input data file path\n") + String.format("     -help                   : show help");
+		final String help_str = "" + String.format("     -config     <path>      : input configure file path\n") + String.format("     -data       <path>      : input data file path\n") + String.format("     -help                   : show help");
 		System.out.println(help_str);
 	}
 }

@@ -25,13 +25,13 @@ public class DatabaseConnection {
 	// Connection to the DB
 
 	private Connection conn = null;
+	private String database;
+	private String passwd;
+	private String schema;
 	// Statement is used to interface queries with the DB
 	private Statement stmt;
-	private String database;
-	private String schema;
 	private String URL;
 	private String user;
-	private String passwd;
 
 	public DatabaseConnection(String URL_param, String driver, String database_param, String user_param, String passwd_param) {
 
@@ -48,7 +48,7 @@ public class DatabaseConnection {
 			conn = DriverManager.getConnection(URL_param, user_param, passwd_param);
 			// Ready an SQL statement
 			stmt = conn.createStatement();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Error Connecting to Database");
 			e.printStackTrace();
 			System.err.println("Program terminated with exit status 1");
@@ -89,7 +89,7 @@ public class DatabaseConnection {
 			}
 			// Ready an SQL statement
 			stmt = conn.createStatement();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Error Connecting to Database");
 			System.err.println("Program terminated with exit status 1");
 		}
@@ -107,19 +107,19 @@ public class DatabaseConnection {
 		if (conn == null) {
 			return false;
 		}
-		String query = "SELECT COUNT(*) AS \"COUNT\" " + "FROM information_schema.tables " + "WHERE table_schema = '" + schema_param + "' " + "AND table_name = '" + table.toLowerCase() + "';";
+		final String query = "SELECT COUNT(*) AS \"COUNT\" " + "FROM information_schema.tables " + "WHERE table_schema = '" + schema_param + "' " + "AND table_name = '" + table.toLowerCase() + "';";
 		ResultSet rs = null;
 		try {
 			if (stmt.execute(query)) {
 				rs = stmt.getResultSet();
 				rs.next();
-				String exists = rs.getString(1);
+				final String exists = rs.getString(1);
 				// System.out.println("Row data:" + exists);
 				if (exists.equals("0")) {
 					return false;
 				}
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Error checking if table exists");
 			e.printStackTrace();
 			return false;
@@ -139,19 +139,19 @@ public class DatabaseConnection {
 		if (conn == null) {
 			return false;
 		}
-		String query = "SELECT COUNT(*) AS \"COUNT\" " + "FROM information_schema.views " + "WHERE table_schema = '" + schema_param + "' " + "AND table_name = '" + table.toLowerCase() + "';";
+		final String query = "SELECT COUNT(*) AS \"COUNT\" " + "FROM information_schema.views " + "WHERE table_schema = '" + schema_param + "' " + "AND table_name = '" + table.toLowerCase() + "';";
 		ResultSet rs = null;
 		try {
 			if (stmt.execute(query)) {
 				rs = stmt.getResultSet();
 				rs.next();
-				String exists = rs.getString(1);
+				final String exists = rs.getString(1);
 				// System.out.println("Row data:" + exists);
 				if (exists.equals("0")) {
 					return false;
 				}
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Error checking if table exists");
 			e.printStackTrace();
 			return false;
@@ -170,19 +170,19 @@ public class DatabaseConnection {
 		if (conn == null) {
 			return false;
 		}
-		String query = "SELECT COUNT(*) AS \"COUNT\" " + "FROM information_schema.tables " + "WHERE table_schema = '" + this.database + "' " + "AND table_name = '" + table + "';";
+		final String query = "SELECT COUNT(*) AS \"COUNT\" " + "FROM information_schema.tables " + "WHERE table_schema = '" + this.database + "' " + "AND table_name = '" + table + "';";
 		ResultSet rs = null;
 		try {
 			if (stmt.execute(query)) {
 				rs = stmt.getResultSet();
 				rs.next();
-				String exists = rs.getString(1);
+				final String exists = rs.getString(1);
 				// System.out.println("Row data:" + exists);
 				if (exists.equals("0")) {
 					return false;
 				}
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Error checking if table exists");
 			e.printStackTrace();
 			return false;
@@ -200,7 +200,7 @@ public class DatabaseConnection {
 			try {
 				conn.close();
 				conn = null;
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				System.err.println("Could not close connection");
 				e.printStackTrace();
 			}
@@ -220,13 +220,13 @@ public class DatabaseConnection {
 		if (conn == null) {
 			return false;
 		}
-		String query = strSQL;
-		ResultSet rs = null;
+		final String query = strSQL;
+		final ResultSet rs = null;
 		try {
 			if (stmt.execute(query)) {
 				return true;
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Error checking if table exists");
 			e.printStackTrace();
 			return false;
@@ -250,7 +250,7 @@ public class DatabaseConnection {
 		try {
 			// attempt to execute the query
 			stmt.execute(query);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Could not execute query: \n" + query);
 			e.printStackTrace();
 			System.exit(1);
@@ -273,7 +273,7 @@ public class DatabaseConnection {
 		}
 		try {
 			columnCount = getColumnCount(sqlResults.getMetaData());
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Could not fetch columnCount from sqlResults MetaData");
 			e.printStackTrace();
 		}
@@ -294,7 +294,7 @@ public class DatabaseConnection {
 		}
 		try {
 			columnCount = sqlRSMD.getColumnCount();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Could not fetch columnCount from sqlResults MetaData");
 			e.printStackTrace();
 		}
@@ -333,7 +333,7 @@ public class DatabaseConnection {
 			for (int i = 0; i < columnCount; i++) {
 				columnNames[i] = sqlRSMD.getColumnName(i + 1);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Could not fetch column names. " + "\nHave you set SQL ResultSetMetaData properly?");
 			e.printStackTrace();
 		}
@@ -364,13 +364,13 @@ public class DatabaseConnection {
 			// Return null if there are no rows to parse
 			if (sqlResults.next()) {
 				// return null if you can't get the column count
-				int n = getColumnCount(sqlResults);
+				final int n = getColumnCount(sqlResults);
 				if (n < 0) {
 					return s;
 				}
 				// Initialize the string with DB results, getting things by columnName
 				s = new String[n];
-				String[] colNames = getColumnNames(sqlResults);
+				final String[] colNames = getColumnNames(sqlResults);
 				// Iterate through each record's value
 				for (int i = 0; i < n; i++) {
 					// Add values to the array if they exist
@@ -382,7 +382,7 @@ public class DatabaseConnection {
 					}
 				}
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Could not fetch result into string array");
 			e.printStackTrace();
 			System.err.println("Program terminated with exit status 1");
@@ -405,13 +405,13 @@ public class DatabaseConnection {
 			// Return null if there are no rows to parse
 			if (sqlResults.next()) {
 				// return null if you can't get the column count
-				int n = getColumnCount(sqlResults);
+				final int n = getColumnCount(sqlResults);
 				if (n < 0) {
 					return s;
 				}
 				// Initialize the string with DB results, getting things by columnName
 				s = new String[2][n];
-				String[] colNames = getColumnNames(sqlResults);
+				final String[] colNames = getColumnNames(sqlResults);
 				// Iterate through each record's value
 				for (int i = 0; i < n; i++) {
 					// Add values to the array if they exist
@@ -424,7 +424,7 @@ public class DatabaseConnection {
 					}
 				}
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Could not fetch result into string array");
 			e.printStackTrace();
 			System.err.println("Program terminated with exit status 1");
@@ -450,7 +450,7 @@ public class DatabaseConnection {
 			sqlResults.last();
 			rowCount = sqlResults.getRow();
 			sqlResults.first();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Could not fetch number of Rows from sqlResults");
 			e.printStackTrace();
 		}
@@ -465,8 +465,8 @@ public class DatabaseConnection {
 	 */
 	public int getRowCount(String table) {
 
-		ResultSet sqlResults = getTableQuery("SELECT COUNT(*) AS COUNT FROM " + table + " ;");
-		String[] dataRow = getNextResult(sqlResults);
+		final ResultSet sqlResults = getTableQuery("SELECT COUNT(*) AS COUNT FROM " + table + " ;");
+		final String[] dataRow = getNextResult(sqlResults);
 		return new Integer(dataRow[0]);
 	}
 
@@ -485,7 +485,7 @@ public class DatabaseConnection {
 		if (conn == null) {
 			return result;
 		}
-		String query = strSQL;
+		final String query = strSQL;
 		ResultSet rs = null;
 		try {
 			if (stmt.execute(query)) {
@@ -493,7 +493,7 @@ public class DatabaseConnection {
 				rs.next();
 				result = rs.getString(1);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Error checking if table exists");
 			e.printStackTrace();
 			return null;
@@ -526,7 +526,7 @@ public class DatabaseConnection {
 		ResultSetMetaData sqlRSMD = null;
 		try {
 			sqlRSMD = sqlResults.getMetaData();
-		} catch (SQLException e1) {
+		} catch (final SQLException e1) {
 			System.err.println("Error in fetching MetaData");
 			e1.printStackTrace();
 		}
@@ -552,7 +552,7 @@ public class DatabaseConnection {
 			} else {
 				System.err.println("Selection failed. Unknown Error");
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			System.err.println("Selection failed. Check query?");
 			System.err.println("Query:" + query);
 			e.printStackTrace();

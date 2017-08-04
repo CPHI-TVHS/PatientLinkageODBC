@@ -35,18 +35,18 @@ import pm.PMCompEnv;
 public class Env<T> extends network.Client {
 
 	String addr;
-	int port;
-	Mode mode;
 	boolean[][][] bin_b;
-	boolean[][] z;
 	int len_a;
-	ArrayList<PatientLinkage> res = null;
-	int numOfTasks;
-	boolean step2_usingmask = false;
-	boolean verbose = false;
+	Mode mode;
 	int num_of_matched = 0;
+	int numOfTasks;
 	ArrayList<String> PartyA_IDs;
 	ArrayList<String> PartyB_IDs;
+	int port;
+	ArrayList<PatientLinkage> res = null;
+	boolean step2_usingmask = false;
+	boolean verbose = false;
+	boolean[][] z;
 
 	/**
 	 * @param addr
@@ -92,7 +92,7 @@ public class Env<T> extends network.Client {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@SuppressWarnings("unchecked")
 	public void implement() {
@@ -115,21 +115,21 @@ public class Env<T> extends network.Client {
 						break;
 				}
 			}
-			byte[] lenBytes = readBytes(is);
+			final byte[] lenBytes = readBytes(is);
 			this.len_a = ByteBuffer.wrap(lenBytes).getInt();
 			writeByte(os, ByteBuffer.allocate(4).putInt(bin_b.length).array());
 			os.flush();
 			this.z = new boolean[len_a][bin_b.length];
 			// input
-			Object[] inputs = new Object[this.numOfTasks];
-			boolean[][][] bin_a = Util.generateDummyArray(bin_b, len_a);
-			int[][] Range0 = Util.linspace(0, this.len_a, numOfTasks);
+			final Object[] inputs = new Object[this.numOfTasks];
+			final boolean[][][] bin_a = Util.generateDummyArray(bin_b, len_a);
+			final int[][] Range0 = Util.linspace(0, this.len_a, numOfTasks);
 			System.out.println("initializing filter circuit...");
 			PatientLinkage4GadgetInputs.resetBar();
 			PatientLinkage4GadgetInputs.all_progresses = len_a + this.bin_b.length * this.numOfTasks;
 			for (int i = 0; i < this.numOfTasks; i++) {
-				PatientLinkage4GadgetInputs<T> tmp0 = new PatientLinkage4GadgetInputs<>(Arrays.copyOfRange(bin_a, Range0[i][0], Range0[i][1]), eva, "Alice", i);
-				PatientLinkage4GadgetInputs<T> tmp1 = new PatientLinkage4GadgetInputs<>(this.bin_b, eva, "Bob", i);
+				final PatientLinkage4GadgetInputs<T> tmp0 = new PatientLinkage4GadgetInputs<>(Arrays.copyOfRange(bin_a, Range0[i][0], Range0[i][1]), eva, "Alice", i);
+				final PatientLinkage4GadgetInputs<T> tmp1 = new PatientLinkage4GadgetInputs<>(this.bin_b, eva, "Bob", i);
 				inputs[i] = new Object[] { tmp0, tmp1 };
 			}
 			System.out.println(String.format("[%s]%d%%    \r", PatientLinkage4GadgetInputs.progress(100), 100));
@@ -137,29 +137,29 @@ public class Env<T> extends network.Client {
 			// end
 			// compute
 			System.out.println("computing filter circuit...");
-			CompPool<T> pool = new CompPool(eva, this.addr, this.port + 1);
+			final CompPool<T> pool = new CompPool(eva, this.addr, this.port + 1);
 			PatientLinkageGadget.resetBar();
 			PatientLinkageGadget.all_progresses = Util.getPtLnkCnts(Range0, this.bin_b.length);
-			Object[] result = pool.runGadget(new PatientLinkageGadget(), inputs);
-			T[][] d = Util.<T>unifyArray(result, eva, len_a);
+			final Object[] result = pool.runGadget(new PatientLinkageGadget(), inputs);
+			final T[][] d = Util.<T>unifyArray(result, eva, len_a);
 			System.out.println(String.format("[%s]%d%%    \r", PatientLinkage4GadgetInputs.progress(100), 100));
 			os.flush();
 			// end
 			// Output
-			for (T[] d1 : d) {
-				for (T d11 : d1) {
+			for (final T[] d1 : d) {
+				for (final T d11 : d1) {
 					eva.outputToAlice(d11);
 				}
 			}
 			os.flush();
 			// end
-			ObjectInputStream ois = new ObjectInputStream(is);
+			final ObjectInputStream ois = new ObjectInputStream(is);
 			num_of_matched = (Integer) ois.readObject();
 			z = ((PatientLinkageResultMask) ois.readObject()).getMask();
 			if (!step2_usingmask) {
 				res = (ArrayList<PatientLinkage>) ois.readObject();
 			}
-			ObjectOutputStream oos = new ObjectOutputStream(os);
+			final ObjectOutputStream oos = new ObjectOutputStream(os);
 			this.PartyA_IDs = (ArrayList<String>) ois.readObject();
 			oos.writeObject(this.PartyB_IDs);
 			oos.flush();
@@ -168,12 +168,12 @@ public class Env<T> extends network.Client {
 			System.out.println("pass here");
 			if (this.verbose) {
 				for (int n = 0; n < res.size(); n++) {
-					int[] link0 = res.get(n).getLinkage();
+					final int[] link0 = res.get(n).getLinkage();
 					System.out.println(link0[0] + " -> " + link0[1]);
 				}
 				System.out.println("the num of matches records: " + res.size());
 			}
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			Logger.getLogger(Env.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
