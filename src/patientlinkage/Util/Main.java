@@ -23,9 +23,13 @@ import patientlinkage.DataType.PatientLinkage;
 import patientlinkage.GarbledCircuit.PatientLinkageGadget;
 import patientlinkage.parties.Env;
 import patientlinkage.parties.Gen;
+import patientlinkage.parties.PartyBase;
 
 /**
  * @author cf
+ */
+/**
+ * @author Dax Westerman
  */
 public class Main {
 
@@ -183,7 +187,6 @@ public class Main {
 			Logger.getLogger(PatientLinkageGadget.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		final Helper help1 = Util.readAndEncodeByHash(new DBConfig(DB_url, DB_port, DB_name, DB_table, DB_user, DB_password, id, prop_array), filter_hash_bits);
-		;
 		data_bin = help1.data_bin;
 		CompPool.MaxNumberTask = threads;
 		long t0, t1;
@@ -199,7 +202,7 @@ public class Main {
 				System.out.println("The running time of filtering is " + t_p + " seconds.");
 				potential_linkage_num = gen.getNumOfMatched();
 				System.out.println("Potential linkage number: " + potential_linkage_num);
-				res = gen.getRes();
+				res = gen.getPatientLinkages();
 				PartyB_IDs = gen.getPartyB_IDs();
 				t_a = t_p;
 				break;
@@ -207,15 +210,15 @@ public class Main {
 				PartyB_IDs = help1.IDs;
 				System.out.println("start patientlinkage algorithm ...");
 				t0 = System.currentTimeMillis();
-				final Env<GCSignal> eva = new Env<>(addr, port, Mode.REAL, threads, data_bin, step2_usingmask, PartyB_IDs);
+				final PartyBase<GCSignal> eva = new Env<>(addr, port, Mode.REAL, threads, data_bin, step2_usingmask, PartyB_IDs);
 				eva.implement();
 				t1 = System.currentTimeMillis() - t0;
 				t_p = t1 / 1e3;
 				System.out.println("The running time of patientlinkage algorithm is " + t_p + " seconds.");
 				potential_linkage_num = eva.getNumOfMatched();
 				System.out.println("Potential linkage number: " + potential_linkage_num);
-				res = eva.getRes();
-				PartyA_IDs = eva.getPartyA_IDs();
+				res = eva.getPatientLinkages();
+				PartyA_IDs = eva.getPartyIds();
 				t_a = t_p;
 				break;
 			default:
