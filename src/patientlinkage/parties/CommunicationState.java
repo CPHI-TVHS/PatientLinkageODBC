@@ -11,61 +11,72 @@ import patientlinkage.DataType.PatientLinkage;
 /**
  * @author Dax Westerman
  */
-public class CommunicationState {
+public abstract class CommunicationState implements IState {
 
-	private final String _address;
+	private String _address;
 	private final boolean[][][] _bin;
 	private int _length;
+	private boolean[][] _mask;
 	private final Mode _mode;
-	private final int _num_of_matched = 0;
-	private final int _numOfTasks;
-	private ArrayList<String> _partyA_IDs;
-	private final ArrayList<String> _partyB_IDs;
-	private ArrayList<PatientLinkage> _patientLinkages = null;
+	private int _number_of_matched = 0;
+	private final int _number_of_tasks;
+	private ArrayList<PatientLinkage> _patient_linkages = null;
 	private final int _port;
-	private boolean _step2_usingmask = false;
+	private boolean _step_2_is_using_mask = false;
 	private final boolean _verbose = false;
-	private boolean[][] _z;
+	private final PartyIds _localIds;
+	private RemoteIds _remoteIds;
 
 	/**
 	 * @param port
 	 * @param mode
-	 * @param bin_a
-	 * @param step2_usingmask
-	 * @param numOfTasks
-	 * @param partyA_IDs
+	 * @param bin
+	 * @param step2_is_using_mask
+	 * @param number_of_tasks
+	 * @param localIds
 	 */
-	public CommunicationState(int port, Mode mode, boolean[][][] bin_a, boolean step2_usingmask, int numOfTasks, ArrayList<String> partyA_IDs) {
+	public CommunicationState(int port, Mode mode, boolean[][][] bin, boolean step2_is_using_mask, int number_of_tasks, PartyIds localIds) {
 
-		this(null, port, mode, bin_a, step2_usingmask, numOfTasks, partyA_IDs);
+		_address = null;
+		_port = port;
+		_mode = mode;
+		_bin = bin;
+		if (!step2_is_using_mask) {
+			_patient_linkages = new ArrayList<>();
+		}
+		_number_of_tasks = number_of_tasks;
+		_step_2_is_using_mask = step2_is_using_mask;
+		_localIds = localIds;
 	}
 
 	/**
-	 * @param addr
+	 * @param address
 	 * @param port
 	 * @param mode
-	 * @param bin_b
-	 * @param step2_usingmask
-	 * @param numOfTasks
-	 * @param partyB_IDs
+	 * @param bin
+	 * @param step2_using_mask
+	 * @param num_of_tasks
+	 * @param localIds
 	 */
-	public CommunicationState(String addr, int port, Mode mode, boolean[][][] bin_b, boolean step2_usingmask, int numOfTasks, ArrayList<String> partyB_IDs) {
+	public CommunicationState(String address, int port, Mode mode, boolean[][][] bin, boolean step2_using_mask, int num_of_tasks, PartyIds localIds) {
 
-		this._address = addr;
-		this._port = port;
-		this._mode = mode;
-		this._bin = bin_b;
-		if (!step2_usingmask) {
-			this._patientLinkages = new ArrayList<>();
-		}
-		this._numOfTasks = numOfTasks;
-		this._step2_usingmask = step2_usingmask;
-		this._partyB_IDs = partyB_IDs;
+		this(port, mode, bin, step2_using_mask, num_of_tasks, localIds);
+		_address = address;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean doesStepTwoUseMask() {
+
+		return _step_2_is_using_mask;
 	}
 
 	/**
 	 * @return the address
 	 */
+	@Override
 	public String getAddress() {
 
 		return _address;
@@ -74,6 +85,7 @@ public class CommunicationState {
 	/**
 	 * @return the bin
 	 */
+	@Override
 	public boolean[][][] getBin() {
 
 		return _bin;
@@ -82,9 +94,26 @@ public class CommunicationState {
 	/**
 	 * @return the length
 	 */
+	@Override
 	public int getLength() {
 
 		return _length;
+	}
+
+	/**
+	 * @return the party_A_Ids
+	 */
+	public LocalIds getLocalIds() {
+
+		return (LocalIds) _localIds;
+	}
+
+	/**
+	 * @return the z
+	 */
+	public boolean[][] getMask() {
+
+		return _mask;
 	}
 
 	/**
@@ -98,33 +127,18 @@ public class CommunicationState {
 	/**
 	 * @return the num_of_matched
 	 */
-	public int getNum_of_matched() {
+	public int getNumberOfMatched() {
 
-		return _num_of_matched;
+		return _number_of_matched;
 	}
 
 	/**
 	 * @return the numOfTasks
 	 */
+	@Override
 	public int getNumOfTasks() {
 
-		return _numOfTasks;
-	}
-
-	/**
-	 * @return the partyA_IDs
-	 */
-	public ArrayList<String> getPartyA_IDs() {
-
-		return _partyA_IDs;
-	}
-
-	/**
-	 * @return the partyB_IDs
-	 */
-	public ArrayList<String> getPartyB_IDs() {
-
-		return _partyB_IDs;
+		return _number_of_tasks;
 	}
 
 	/**
@@ -132,38 +146,76 @@ public class CommunicationState {
 	 */
 	public ArrayList<PatientLinkage> getPatientLinkages() {
 
-		return _patientLinkages;
+		return _patient_linkages;
 	}
 
 	/**
 	 * @return the port
 	 */
+	@Override
 	public int getPort() {
 
 		return _port;
 	}
 
 	/**
-	 * @return the z
+	 * @return the party_B_Ids
 	 */
-	public boolean[][] getZ() {
+	public RemoteIds getRemoteIds() {
 
-		return _z;
-	}
-
-	/**
-	 * @return the step2_usingmask
-	 */
-	public boolean isStep2_usingmask() {
-
-		return _step2_usingmask;
+		return _remoteIds;
 	}
 
 	/**
 	 * @return the verbose
 	 */
+	@Override
 	public boolean isVerbose() {
 
 		return _verbose;
+	}
+
+	/**
+	 * @param length
+	 */
+	@Override
+	public void setLength(int length) {
+
+		_length = length;
+	}
+
+	/**
+	 * @param mask
+	 */
+	@Override
+	public void setMask(boolean[][] mask) {
+
+		_mask = mask;
+	}
+
+	/**
+	 * @param number_of_matched
+	 */
+	@Override
+	public void setNumberOfMatched(int number_of_matched) {
+
+		_number_of_matched = number_of_matched;
+	}
+
+	/**
+	 * @param patient_linkages
+	 */
+	@Override
+	public void setPatientLinkages(ArrayList<PatientLinkage> patient_linkages) {
+
+		_patient_linkages = patient_linkages;
+	}
+
+	/**
+	 * @param readObject
+	 */
+	protected void setRemoteIds(ArrayList<String> readObject) {
+
+		_remoteIds.set(readObject);
 	}
 }

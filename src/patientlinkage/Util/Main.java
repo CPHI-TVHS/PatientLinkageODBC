@@ -1,6 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties. To change this template file, choose Tools | Templates and open the template in
- * the editor.
+ *
  */
 package patientlinkage.Util;
 
@@ -24,6 +23,8 @@ import patientlinkage.GarbledCircuit.PatientLinkageGadget;
 import patientlinkage.parties.Env;
 import patientlinkage.parties.Gen;
 import patientlinkage.parties.PartyBase;
+import patientlinkage.parties.LocalIds;
+import patientlinkage.parties.RemoteIds;
 
 /**
  * @author cf
@@ -69,8 +70,8 @@ public class Main {
 		final ArrayList<DBProperty[]> prop_array = new ArrayList<>();
 		ArrayList<PatientLinkage> res = null;
 		boolean[][][] data_bin;
-		ArrayList<String> PartyA_IDs;
-		ArrayList<String> PartyB_IDs;
+		LocalIds PartyA_IDs;
+		RemoteIds PartyB_IDs;
 		int potential_linkage_num;
 		double t_p = 0, t_a = 0;
 		if (args.length < 1) {
@@ -192,33 +193,33 @@ public class Main {
 		long t0, t1;
 		switch (party) {
 			case "generator":
-				PartyA_IDs = help1.IDs;
+				PartyA_IDs = new LocalIds(help1.IDs);
 				System.out.println("start filtering linkage ...");
 				t0 = System.currentTimeMillis();
-				final Gen<GCSignal> gen = new Gen<>(port, Mode.REAL, threads, data_bin, step2_usingmask, PartyA_IDs);
+				final Gen<GCSignal> gen = new Gen<>(port, Mode.REAL, data_bin, step2_usingmask, threads, PartyA_IDs);
 				gen.implement();
 				t1 = System.currentTimeMillis() - t0;
 				t_p = t1 / 1e3;
 				System.out.println("The running time of filtering is " + t_p + " seconds.");
-				potential_linkage_num = gen.getNumOfMatched();
+				potential_linkage_num = gen.getNumberOfMatched();
 				System.out.println("Potential linkage number: " + potential_linkage_num);
 				res = gen.getPatientLinkages();
-				PartyB_IDs = gen.getPartyB_IDs();
+				PartyB_IDs = gen.getRemoteIds();
 				t_a = t_p;
 				break;
 			case "evaluator":
-				PartyB_IDs = help1.IDs;
+				PartyB_IDs = new RemoteIds(help1.IDs);
 				System.out.println("start patientlinkage algorithm ...");
 				t0 = System.currentTimeMillis();
-				final PartyBase<GCSignal> eva = new Env<>(addr, port, Mode.REAL, threads, data_bin, step2_usingmask, PartyB_IDs);
+				final PartyBase<GCSignal> eva = new Env<>(addr, port, Mode.REAL, data_bin, step2_usingmask, threads, PartyB_IDs);
 				eva.implement();
 				t1 = System.currentTimeMillis() - t0;
 				t_p = t1 / 1e3;
 				System.out.println("The running time of patientlinkage algorithm is " + t_p + " seconds.");
-				potential_linkage_num = eva.getNumOfMatched();
+				potential_linkage_num = eva.getNumberOfMatched();
 				System.out.println("Potential linkage number: " + potential_linkage_num);
 				res = eva.getPatientLinkages();
-				PartyA_IDs = eva.getPartyIds();
+				PartyA_IDs = eva.getLocalIds();
 				t_a = t_p;
 				break;
 			default:

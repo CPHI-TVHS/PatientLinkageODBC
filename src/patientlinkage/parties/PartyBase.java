@@ -5,26 +5,32 @@ package patientlinkage.parties;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 
 import cv.CVCompEnv;
 import flexsc.CompEnv;
 import flexsc.Mode;
 import flexsc.Party;
 import gc.GCEva;
-import patientlinkage.DataType.PatientLinkage;
 import pm.PMCompEnv;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Interface IParty.
  *
  * @author Dax Westerman
  * @param <T> the generic type
  */
-public abstract class PartyBase<T> {
+public abstract class PartyBase<T> extends CommunicationState implements IState {
 
-	/** The state. */
-	CommunicationState _state;
+	/**
+	 * Log.
+	 *
+	 * @param msg the msg
+	 */
+	protected static void log(String msg) {
+
+		System.out.println(msg);
+	}
 
 	/**
 	 * @param port
@@ -32,11 +38,11 @@ public abstract class PartyBase<T> {
 	 * @param bin
 	 * @param step2_using_mask
 	 * @param num_of_tasks
-	 * @param party_ids
+	 * @param localIds
 	 */
-	public PartyBase(int port, Mode mode, boolean[][][] bin, boolean step2_using_mask, int num_of_tasks, ArrayList<String> party_ids) {
+	public PartyBase(int port, Mode mode, boolean[][][] bin, boolean step2_using_mask, int num_of_tasks, PartyIds localIds) {
 
-		_state = new CommunicationState(port, mode, bin, step2_using_mask, num_of_tasks, party_ids);
+		super(port, mode, bin, step2_using_mask, num_of_tasks, localIds);
 	}
 
 	/**
@@ -46,19 +52,28 @@ public abstract class PartyBase<T> {
 	 * @param bin
 	 * @param step2_using_mask
 	 * @param num_of_tasks
-	 * @param party_ids
+	 * @param localIds
 	 */
-	public PartyBase(String addr, int port, Mode mode, boolean[][][] bin, boolean step2_using_mask, int num_of_tasks, ArrayList<String> party_ids) {
+	public PartyBase(String addr, int port, Mode mode, boolean[][][] bin, boolean step2_using_mask, int num_of_tasks, PartyIds localIds) {
 
-		_state = new CommunicationState(addr, port, mode, bin, step2_using_mask, num_of_tasks, party_ids);
+		super(addr, port, mode, bin, step2_using_mask, num_of_tasks, localIds);
 	}
 
+	/**
+	 * Gets the comp env.
+	 *
+	 * @param partyName the party name
+	 * @param is the is
+	 * @param os the os
+	 * @return the comp env
+	 * @throws Exception the exception
+	 */
 	@SuppressWarnings("unchecked")
 	protected CompEnv<T> getCompEnv(Party partyName, InputStream is, OutputStream os) throws Exception {
 
 		CompEnv<T> eva = null;
-		if (null != _state.getMode()) {
-			switch (_state.getMode()) {
+		if (null != getMode()) {
+			switch (getMode()) {
 				case REAL: {
 					eva = (CompEnv<T>) new GCEva(is, os);
 					break;
@@ -80,39 +95,24 @@ public abstract class PartyBase<T> {
 	}
 
 	/**
-	 * @return
+	 * Gets the party name.
+	 *
+	 * @return the party name
 	 */
-	public boolean[][] getMask() {
-
-		return _state.getZ();
-	}
-
-	/**
-	 * @return
-	 */
-	public int getNumOfMatched() {
-
-		return _state.getNum_of_matched();
-	}
-
-	/**
-	 * @return
-	 */
-	public ArrayList<String> getPartyIds() {
-
-		return _state.getPartyA_IDs();
-	}
-
-	/**
-	 * @return
-	 */
-	public ArrayList<PatientLinkage> getPatientLinkages() {
-
-		return _state.getPatientLinkages();
-	}
+	protected abstract Party getPartyName();
 
 	/**
 	 * Implement.
 	 */
-	abstract void implement();
+	public abstract void implement();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void incrementNumberOfMatches() {
+
+		int numOfMatched = getNumberOfMatched();
+		setNumberOfMatched(numOfMatched++);
+	}
 }
